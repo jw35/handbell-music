@@ -4,10 +4,12 @@ from __future__ import print_function
 from __future__ import division
 
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A3, landscape
 from reportlab.lib.units import inch
 import fileinput
 import sys
+import re
+import os
 
 DONE = False
 
@@ -15,7 +17,7 @@ DONE = False
 
 def debug(priority,*args):
   if ECHO > priority:
-    print(*args,file=sys.stdout)
+    print(*args,file=sys.stderr)
 
 # ---
 
@@ -25,6 +27,7 @@ def read_line():
   while(True):
     line = input.readline()
     if not line:
+      debug(4, "End of file")
       DONE = True
       return None
     line = line.strip()
@@ -37,7 +40,7 @@ def read_line():
 def process_header():
 
     line = read_line()
-    assert line, "Missing header"
+    assert line, "Missing title"
     TITLE = line.strip()
     debug(0, "Title:", TITLE)
 
@@ -91,9 +94,10 @@ def process_row(y):
     beat = 0
     while not DONE:
 
-      if LINE[0] in ('!','/','\\'):
-        time_char = LINE[0]
-        LINE = LINE[1:]
+      line = LINE
+      if line[0] in ('!','/','\\'):
+        time_char = line[0]
+        line = line[1:]
       else:
         time_char = ''
 
@@ -117,7 +121,7 @@ def process_row(y):
       debug(2, "Current beat:", beat, "offset:", offset)
       if beat > (BEATS*BARS): break
 
-      draw_bells(LINE,beat,offset,y)
+      draw_bells(line,beat,offset,y)
 
       LINE = read_line()
 
@@ -127,7 +131,7 @@ def draw_bells(line,beat,offset,y):
 
   if line == '-': return
 
-  for bell in line.split(' '):
+  for bell in line.split():
 
     if bell[0] == '*':
       page.setFont("Helvetica-Bold", CHAR_HEIGHT)
@@ -135,17 +139,18 @@ def draw_bells(line,beat,offset,y):
     else:
       page.setFont("Helvetica", CHAR_HEIGHT)
 
-    nbell = int(bell)
+    debug(3, "Plotting bell", bell)
+    nbell = int(re.sub(r'[^\d]','',bell))
     assert FIRST <= nbell <= LAST, "Bell number bell outside declared range" 
-    h_pos = H_MARGIN + (COLL_WIDTH*(beat+0.5)) +offset
-    v_pos = LINE_HEIGHT*(LAST-nbell)
+    h_pos = H_MARGIN + (COLL_WIDTH*(beat-0.5)) + offset
+    v_pos = y+(LINE_HEIGHT*(LAST-nbell+0.5)/2)
     page.drawCentredString(h_pos,v_pos,bell)
     debug(3, "    Plotting bell:", bell, "h_pos:", h_pos, "v_pos:", v_pos)
 
 # ---
 
 def process_page():
-  global DONE
+  global DONE, PAGE_COUNTER
 
   page.setFont("Helvetica-Bold", 30)
 
@@ -163,21 +168,21 @@ def process_page():
     process_row(y)
     if DONE: break
 
+  PAGE_COUNTER += 1
   page.showPage()
-  DONE = True
 
 # ---
 
 # Echo: 0 - no output 1 - parameters 2 - info on each row
 #       3 - info on each bell 4 - echo input
 
-ECHO = 5
+ECHO = 0
 
-PAGESIZE=landscape(A4)
+PAGESIZE=landscape(A3)
 (WIDTH,HEIGHT) = PAGESIZE
 debug(1, "Width:", WIDTH, "Height:", HEIGHT)
 V_MARGIN = 0.5*inch
-H_MARGIN = 0.5*inch
+H_MARGIN = 0.6*inch
 HEADER = 0.5*inch
 SEPERATOR = 0.25*inch
 
@@ -193,8 +198,11 @@ input = fileinput.input()
   N_BELLS, CHAR_HEIGHT, LINE_HEIGHT) = setup_parameters()
 
 source = input.filename()
-target = source + ".pdf"
-if source == '-': target = sys.stdout
+if source == '<stdin>':
+  target = sys.stdout
+else:
+  base = os.path.splitext(source)[0]
+  target = base + ".pdf"
 
 page = canvas.Canvas(target, pagesize=PAGESIZE)
 
