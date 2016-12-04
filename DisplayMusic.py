@@ -114,9 +114,10 @@ def setup_parameters():
 
     N_BELLS = LAST - FIRST + 1
     debug(1, "Number of bells:", N_BELLS)
-    CHAR_HEIGHT = 0.8 * COLL_WIDTH
-    LINE_HEIGHT = (ROW_HEIGHT - CHAR_HEIGHT - 5) / ((N_BELLS-1)/2)
-    if CHAR_HEIGHT > LINE_HEIGHT: CHAR_HEIGHT = LINE_HEIGHT 
+
+    LINE_HEIGHT = ROW_HEIGHT/(N_BELLS+0.5)
+    CHAR_HEIGHT = (LINE_HEIGHT)*100/72  # Font 'height' to digit height ratio for Helvetica
+    #CHAR_HEIGHT = 0.8 * COLL_WIDTH
     debug(1, "Character height:", CHAR_HEIGHT, "Line height:", LINE_HEIGHT)
 
     return(TARGET_WIDTH, TARGET_HEIGHT, COLL_WIDTH, ROW_HEIGHT, N_BELLS, CHAR_HEIGHT, LINE_HEIGHT)
@@ -188,7 +189,7 @@ def draw_bells(line,beat,offset,y):
     nbell = int(re.sub(r'[^\d]','',bell))
     assert FIRST <= nbell <= LAST, "Bell number bell outside declared range" 
     h_pos = H_MARGIN + (COLL_WIDTH*(beat-0.5)) + offset
-    v_pos = y+(LINE_HEIGHT*(LAST-nbell+0.5)/2)
+    v_pos = y+(LINE_HEIGHT*(LAST-nbell+0.25))
     page.drawCentredString(h_pos,v_pos,bell)
     debug(3, "    Plotting bell:", bell, "h_pos:", h_pos, "v_pos:", v_pos)
 
@@ -225,7 +226,7 @@ def process_page():
 # Echo: 0 - no output 1 - parameters 2 - info on each row
 #       3 - info on each bell 4 - echo input
 
-ECHO = 0
+ECHO = 5
 
 PAGESIZE=landscape(A3)
 (WIDTH,HEIGHT) = PAGESIZE
