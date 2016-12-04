@@ -21,6 +21,50 @@ def debug(priority,*args):
 
 # ---
 
+def group(l):
+    first = last = l[0]
+    for n in l[1:]:
+        if n - 1 == last: # Part of the group, bump the end
+            last = n
+        else: # Not part of the group, yield current group and start a new
+            yield first, last
+            first = last = n
+    yield first, last # Yield the last group
+
+# ---
+
+def analyse_bells(bells):
+
+    # Seperate bells in the main scale from the accidentals
+    mainscale = []
+    accidentals = []
+    for bell in bells:
+     match = re.match(r'^(\d*)$', bell)
+     if match:
+         mainscale.append(int(match.group(1)))
+     else:
+         accidentals.append(bell)
+
+    # group and format the main scale bells
+    tgroups = []
+    for g in group(sorted(mainscale)):
+        if g[0] == g[1]: # group with one member
+            tgroups.append("%d" % (g[0]))
+        elif g[0] + 1 == g[1]: # group with two members
+            tgroups.append("%d" % (g[0]))
+            tgroups.append("%d" % (g[1]))
+        else: # longer group
+            tgroups.append("%s-%s" % (g[0],g[1]))
+
+    # format the accidentals
+    atext = ''
+    if accidentals:
+        atext = ' + ' + ", ".join(sorted(accidentals))
+
+    return ', '.join(tgroups) + atext
+
+# ---
+
 def read_line():
   global DONE
 
@@ -140,6 +184,7 @@ def draw_bells(line,beat,offset,y):
       page.setFont("Helvetica", CHAR_HEIGHT)
 
     debug(3, "Plotting bell", bell)
+    BELLS_USED.add(bell) 
     nbell = int(re.sub(r'[^\d]','',bell))
     assert FIRST <= nbell <= LAST, "Bell number bell outside declared range" 
     h_pos = H_MARGIN + (COLL_WIDTH*(beat-0.5)) + offset
@@ -168,6 +213,10 @@ def process_page():
     process_row(y)
     if DONE: break
 
+  t = analyse_bells(BELLS_USED)
+  page.setFont("Helvetica", 15)
+  page.drawRightString(WIDTH-H_MARGIN, V_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
+
   PAGE_COUNTER += 1
   page.showPage()
 
@@ -190,6 +239,7 @@ PLAIN_LINE = 1
 BAR_LINE = 2
 
 PAGE_COUNTER = 1
+BELLS_USED = set()
 
 input = fileinput.input()
 
