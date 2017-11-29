@@ -36,14 +36,15 @@ def group(l):
 def analyse_bells(bells):
 
     # Seperate bells in the main scale from the accidentals
-    mainscale = []
-    accidentals = []
+    mainscale = set()
+    accidentals = set()
     for bell in bells:
+     bell = re.sub(r'\((.*)\)',r'\1',bell)
      match = re.match(r'^(\d*)$', bell)
      if match:
-         mainscale.append(int(match.group(1)))
+         mainscale.add(int(match.group(1)))
      else:
-         accidentals.append(bell)
+         accidentals.add(bell)
 
     # group and format the main scale bells
     tgroups = []
