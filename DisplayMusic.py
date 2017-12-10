@@ -4,7 +4,7 @@ from __future__ import print_function
 from __future__ import division
 
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A3, landscape
+from reportlab.lib.pagesizes import A1, portrait
 from reportlab.lib.units import inch
 import fileinput
 import sys
@@ -118,6 +118,9 @@ def setup_parameters():
 
     LINE_HEIGHT = ROW_HEIGHT/(N_BELLS+0.5)
     CHAR_HEIGHT = (LINE_HEIGHT)*100/72  # Font 'height' to digit height ratio for Helvetica
+    width = page.stringWidth('10', "Helvetica", CHAR_HEIGHT)
+    if width > COLL_WIDTH * 1.0:        # If the width of '10' is more than the column width 
+      CHAR_HEIGHT = CHAR_HEIGHT * COLL_WIDTH * 1.0 / width
     #CHAR_HEIGHT = 0.8 * COLL_WIDTH
     debug(1, "Character height:", CHAR_HEIGHT, "Line height:", LINE_HEIGHT)
 
@@ -190,6 +193,9 @@ def draw_bells(line,beat,offset,y):
     nbell = int(re.sub(r'[^\d]','',bell))
     assert FIRST <= nbell <= LAST, "Bell number bell outside declared range" 
     h_pos = H_MARGIN + (COLL_WIDTH*(beat-0.5)) + offset
+    # Visual centre of 10, 11, 12 is 2.5% to the right of the centreline
+    if nbell >= 10:
+    	h_pos = h_pos - LINE_HEIGHT * 2.5 / 100;
     v_pos = y+(LINE_HEIGHT*(LAST-nbell+0.25))
     page.drawCentredString(h_pos,v_pos,bell)
     debug(3, "    Plotting bell:", bell, "h_pos:", h_pos, "v_pos:", v_pos)
@@ -229,7 +235,8 @@ def process_page():
 
 ECHO = 5
 
-PAGESIZE=landscape(A3)
+#PAGESIZE=portrait(A1)
+PAGESIZE = (23.0*inch, 29.5*inch)
 (WIDTH,HEIGHT) = PAGESIZE
 debug(1, "Width:", WIDTH, "Height:", HEIGHT)
 V_MARGIN = 0.5*inch
@@ -246,8 +253,6 @@ BELLS_USED = set()
 input = fileinput.input()
 
 (TITLE,BEATS,BARS,ROWS,FIRST,LAST) = process_header()
-(TARGET_WIDTH, TARGET_HEIGHT, COLL_WIDTH, ROW_HEIGHT, 
-  N_BELLS, CHAR_HEIGHT, LINE_HEIGHT) = setup_parameters()
 
 source = input.filename()
 if source == '<stdin>':
@@ -257,6 +262,9 @@ else:
   target = base + ".pdf"
 
 page = canvas.Canvas(target, pagesize=PAGESIZE)
+
+(TARGET_WIDTH, TARGET_HEIGHT, COLL_WIDTH, ROW_HEIGHT, 
+  N_BELLS, CHAR_HEIGHT, LINE_HEIGHT) = setup_parameters()
 
 LINE = read_line()
 assert not DONE, "Not even a beet of music"
