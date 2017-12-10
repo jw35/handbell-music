@@ -183,10 +183,11 @@ def draw_bells(line,beat,offset,y):
   for bell in line.split():
 
     if bell[0] == '*':
-      page.setFont("Helvetica-Bold", CHAR_HEIGHT)
+      font = "Helvetica-Bold"
       bell = bell[1:]
     else:
-      page.setFont("Helvetica", CHAR_HEIGHT)
+      font = "Helvetica"
+    page.setFont(font, CHAR_HEIGHT)
 
     debug(3, "Plotting bell", bell)
     BELLS_USED.add(bell) 
@@ -197,7 +198,16 @@ def draw_bells(line,beat,offset,y):
     if nbell >= 10:
     	h_pos = h_pos - LINE_HEIGHT * 2.5 / 100;
     v_pos = y+(LINE_HEIGHT*(LAST-nbell+0.25))
-    page.drawCentredString(h_pos,v_pos,bell)
+    # Special handling for sharps
+    if re.search(r'#$', bell):
+      debug(3, "    Processing a #")
+      page.drawCentredString(h_pos,v_pos,str(nbell))
+      width = page.stringWidth(str(nbell), font, CHAR_HEIGHT)
+      page.setFont(font, CHAR_HEIGHT*0.8)
+      page.drawString(h_pos+(width/2),v_pos+(CHAR_HEIGHT*0.4),'#')
+      page.setFont(font, CHAR_HEIGHT)
+    else:
+      page.drawCentredString(h_pos,v_pos,bell)
     debug(3, "    Plotting bell:", bell, "h_pos:", h_pos, "v_pos:", v_pos)
 
 # ---
