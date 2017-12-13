@@ -214,7 +214,7 @@ def draw_bells(line,beat,offset,partial,y):
       page.drawString(h_pos+(width/2),v_pos+(CHAR_HEIGHT*0.4),char)
       page.setFont(font, CHAR_HEIGHT)
     else:
-      # Put a white box behind 'partial' notes
+      # Put a white box behind partial notes
       if partial:
         width = page.stringWidth(str(nbell), font, CHAR_HEIGHT)
         height = CHAR_HEIGHT * 72 / 100 # Font 'height' to digit height ratio for Helvetica
