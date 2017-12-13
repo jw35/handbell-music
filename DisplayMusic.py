@@ -132,6 +132,7 @@ def setup_parameters():
 def process_row(y):
     global DONE, LINE
 
+    page.setStrokeGray(0.4)
     page.setLineWidth(BAR_LINE)
     page.rect(H_MARGIN, y, TARGET_WIDTH, ROW_HEIGHT)
     for beat in range(1,BARS*BEATS):
@@ -150,15 +151,19 @@ def process_row(y):
       else:
         time_char = ''
 
+      partial = False
       if time_char == '!':
         offset = COLL_WIDTH/2
+        partial = True
         debug(2,"Half beet")
       elif time_char == '/':
         beat += 1
         offset = -COLL_WIDTH/5
+        partial = True
         debug(2,"Double beat, part 1")
       elif time_char == '\\':
         offset = COLL_WIDTH/5
+        partial = True
         debug(2,"Double beat, part 2")
       else:
         beat += 1
@@ -170,13 +175,13 @@ def process_row(y):
       debug(2, "Current beat:", beat, "offset:", offset)
       if beat > (BEATS*BARS): break
 
-      draw_bells(line,beat,offset,y)
+      draw_bells(line,beat,offset,partial,y)
 
       LINE = read_line()
 
 # ---
 
-def draw_bells(line,beat,offset,y):
+def draw_bells(line,beat,offset,partial,y):
 
   if line == '-': return
 
@@ -198,15 +203,25 @@ def draw_bells(line,beat,offset,y):
     if nbell >= 10:
     	h_pos = h_pos - LINE_HEIGHT * 2.5 / 100;
     v_pos = y+(LINE_HEIGHT*(LAST-nbell+0.25))
-    # Special handling for sharps
-    if re.search(r'#$', bell):
-      debug(3, "    Processing a #")
+    match = re.search(r'([#,b])$', bell)
+    # Special handling for sharps and flats
+    if match:
+      char = match.group(1)
+      debug(3, "    Processing a", char)
       page.drawCentredString(h_pos,v_pos,str(nbell))
       width = page.stringWidth(str(nbell), font, CHAR_HEIGHT)
       page.setFont(font, CHAR_HEIGHT*0.8)
-      page.drawString(h_pos+(width/2),v_pos+(CHAR_HEIGHT*0.4),'#')
+      page.drawString(h_pos+(width/2),v_pos+(CHAR_HEIGHT*0.4),char)
       page.setFont(font, CHAR_HEIGHT)
     else:
+      # Put a white box behind 'partial' notes
+      if partial:
+        width = page.stringWidth(str(nbell), font, CHAR_HEIGHT)
+        height = CHAR_HEIGHT * 72 / 100 # Font 'height' to digit height ratio for Helvetica
+        page.setFillColor('white')
+        page.rect(h_pos-(width/2.0), v_pos - (0.2 * height), width, 1.4*height, stroke=0, fill=1)
+      page.setFillColor('black')
+      page.setFont(font, CHAR_HEIGHT)
       page.drawCentredString(h_pos,v_pos,bell)
     debug(3, "    Plotting bell:", bell, "h_pos:", h_pos, "v_pos:", v_pos)
 
