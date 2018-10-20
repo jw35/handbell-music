@@ -265,8 +265,22 @@ def process_page():
     page.setFont("Helvetica", 15)
     page.drawRightString(WIDTH-H_MARGIN, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
 
+    offset = (WIDTH-(17.5*inch))/2.0
+    draw_hole(offset, HEIGHT-(1*inch))
+    draw_hole(WIDTH-(offset), HEIGHT-(1*inch))
+
     PAGE_COUNTER += 1
     page.showPage()
+
+
+def draw_hole(x, y):
+    # Draw a hole marker centered on x,y
+
+    radius = 0.25*inch
+    page.setLineWidth(PLAIN_LINE)
+    page.circle(x, y, radius)
+    page.line(x-radius, y, x+radius, y)
+    page.line(x, y-radius, x, y+radius)
 
 # ---
 
@@ -280,7 +294,7 @@ PAGESIZE = portrait(A1)
 # PAGESIZE = (23.0*inch, 29.5*inch)
 (WIDTH, HEIGHT) = PAGESIZE
 debug(1, "Width:", WIDTH, "Height:", HEIGHT)
-TOP_MARGIN = 1.25*inch
+TOP_MARGIN = 1.75*inch
 BOTTOM_MARGIN = 0.75*inch
 H_MARGIN = 0.75*inch
 HEADER = 0.5*inch
