@@ -10,6 +10,7 @@ import fileinput
 import sys
 import re
 import os
+import platform
 
 DONE = False
 
@@ -314,3 +315,7 @@ while not DONE:
     process_page()
 
 page.save()
+
+if platform.system() == 'Windows':
+    print("Press return to continue...")
+    sys.stdin.readline()
