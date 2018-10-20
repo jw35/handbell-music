@@ -104,7 +104,7 @@ def process_header():
 def setup_parameters():
 
     TARGET_WIDTH = WIDTH-(2*H_MARGIN)
-    TARGET_HEIGHT = HEIGHT-(2*V_MARGIN)-HEADER
+    TARGET_HEIGHT = HEIGHT-TOP_MARGIN-BOTTOM_MARGIN-HEADER
     debug(1, "Target width:", TARGET_WIDTH, "Target height:", TARGET_HEIGHT)
 
     COLL_WIDTH = TARGET_WIDTH/(BARS*BEATS)
@@ -214,7 +214,7 @@ def draw_bells(line,beat,offset,partial,y):
       page.drawString(h_pos+(width/2),v_pos+(CHAR_HEIGHT*0.4),char)
       page.setFont(font, CHAR_HEIGHT)
     else:
-      # Put a white box behind partial notes
+      # Put a white box behind partial notes
       if partial:
         width = page.stringWidth(str(nbell), font, CHAR_HEIGHT)
         height = CHAR_HEIGHT * 72 / 100 # Font 'height' to digit height ratio for Helvetica
@@ -234,21 +234,21 @@ def process_page():
 
   t = "%s (page %d)" % (TITLE, PAGE_COUNTER)
   if PAGE_COUNTER == 1: t = TITLE
-  page.drawCentredString(WIDTH/2, V_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
+  page.drawCentredString(WIDTH/2, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
   
   page.setFont("Helvetica", CHAR_HEIGHT)
 
   # E.g. 2,1,0 for ROWS=3
   for row in range(ROWS-1,-1,-1):
 
-    y = V_MARGIN + (row*(ROW_HEIGHT+SEPERATOR))
+    y = BOTTOM_MARGIN + (row*(ROW_HEIGHT+SEPERATOR))
 
     process_row(y)
     if DONE: break
 
   t = analyse_bells(BELLS_USED)
   page.setFont("Helvetica", 15)
-  page.drawRightString(WIDTH-H_MARGIN, V_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
+  page.drawRightString(WIDTH-H_MARGIN, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
 
   PAGE_COUNTER += 1
   page.showPage()
@@ -260,12 +260,13 @@ def process_page():
 
 ECHO = 5
 
-#PAGESIZE=portrait(A1)
-PAGESIZE = (23.0*inch, 29.5*inch)
+PAGESIZE=portrait(A1)
+#PAGESIZE = (23.0*inch, 29.5*inch)
 (WIDTH,HEIGHT) = PAGESIZE
 debug(1, "Width:", WIDTH, "Height:", HEIGHT)
-V_MARGIN = 0.5*inch
-H_MARGIN = 0.6*inch
+TOP_MARGIN = 1.25*inch
+BOTTOM_MARGIN = 0.75*inch
+H_MARGIN = 0.75*inch
 HEADER = 0.5*inch
 SEPERATOR = 0.25*inch
 
