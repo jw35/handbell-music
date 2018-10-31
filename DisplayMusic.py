@@ -138,7 +138,7 @@ def setup_parameters():
 
 
 def process_row(y):
-    global DONE, LINE
+    global DONE, LINE, BUFFER
 
     page.setStrokeGray(0.4)
     page.setLineWidth(BAR_LINE)
@@ -150,6 +150,7 @@ def process_row(y):
         page.line(H_MARGIN+(beat*COLL_WIDTH), y, H_MARGIN+(beat*COLL_WIDTH), y+ROW_HEIGHT)
 
     beat = 0
+    BUFFER = []
     while not DONE:
 
         line = LINE
@@ -188,10 +189,20 @@ def process_row(y):
 
         LINE = read_line()
 
+    page.setFillColor('black')
+    for item in BUFFER:
+        page.setFont(item[0], item[1])
+        if item[2]:
+            page.drawCentredString(item[3], item[4], item[5])
+        else:
+            page.drawString(item[3], item[4], item[5])
+
 # ---
 
 
 def draw_bells(line, beat, offset, partial, y):
+
+    global BUFFER
 
     if line == '-':
         return
@@ -219,11 +230,13 @@ def draw_bells(line, beat, offset, partial, y):
         if match:
             char = match.group(1)
             debug(3, "    Processing a", char)
-            page.drawCentredString(h_pos, v_pos, str(nbell))
+            BUFFER.append((font, CHAR_HEIGHT, True, h_pos, v_pos, str(nbell)))
+            # page.drawCentredString(h_pos, v_pos, str(nbell))
             width = page.stringWidth(str(nbell), font, CHAR_HEIGHT)
-            page.setFont(font, CHAR_HEIGHT*0.8)
-            page.drawString(h_pos+(width/2), v_pos+(CHAR_HEIGHT*0.4), char)
-            page.setFont(font, CHAR_HEIGHT)
+            BUFFER.append((font, CHAR_HEIGHT*0.8, False, h_pos+(width/2), v_pos+(CHAR_HEIGHT*0.4), char))
+            # page.setFont(font, CHAR_HEIGHT*0.8)
+            # page.drawString(h_pos+(width/2), v_pos+(CHAR_HEIGHT*0.4), char)
+            # page.setFont(font, CHAR_HEIGHT)
         else:
             # Put a white box behind partial notes
             if partial:
@@ -232,9 +245,10 @@ def draw_bells(line, beat, offset, partial, y):
                 page.setFillColor('white')
                 page.rect(h_pos-(width/2.0), v_pos - (0.2 * height),
                           width, 1.4*height, stroke=0, fill=1)
-            page.setFillColor('black')
-            page.setFont(font, CHAR_HEIGHT)
-            page.drawCentredString(h_pos, v_pos, bell)
+            BUFFER.append((font, CHAR_HEIGHT, True, h_pos, v_pos, str(bell)))
+            # page.setFillColor('black')
+            # page.setFont(font, CHAR_HEIGHT)
+            # page.drawCentredString(h_pos, v_pos, bell)
         debug(3, "    Plotting bell:", bell, "h_pos:", h_pos, "v_pos:", v_pos)
 
 # ---
