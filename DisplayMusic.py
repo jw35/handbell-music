@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 from __future__ import division
@@ -11,6 +11,7 @@ import sys
 import re
 import os
 import platform
+import datetime
 
 DONE = False
 
@@ -282,6 +283,8 @@ def process_page():
     offset = (WIDTH-(17.5*inch))/2.0
     draw_hole(offset, HEIGHT-(1*inch))
     draw_hole(WIDTH-(offset), HEIGHT-(1*inch))
+
+    page.drawCentredString(WIDTH/2, HEIGHT-(1*inch), datetime.datetime.now().isoformat(sep=' ', timespec='seconds'))
 
     PAGE_COUNTER += 1
     page.showPage()
