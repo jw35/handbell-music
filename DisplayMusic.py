@@ -258,14 +258,12 @@ def draw_bells(line, beat, offset, partial, y):
 def process_page():
     global DONE, PAGE_COUNTER
 
-    page.setFont("Helvetica-Bold", 30)
-
-    t = "%s (page %d)" % (TITLE, PAGE_COUNTER)
+    t1 = "%s (page %d)" % (TITLE, PAGE_COUNTER)
     if PAGE_COUNTER == 1:
-        t = TITLE
-    page.drawCentredString(WIDTH/2, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
+        t1 = TITLE
 
-    page.setFont("Helvetica", CHAR_HEIGHT)
+    page.setFont("Helvetica-Bold", 30)
+    page.drawCentredString(WIDTH/2, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t1)
 
     # E.g. 2,1,0 for ROWS=3
     for row in range(ROWS-1, -1, -1):
@@ -276,14 +274,20 @@ def process_page():
         if DONE:
             break
 
-    t = analyse_bells(BELLS_USED)
+    t2 = analyse_bells(BELLS_USED)
+
     page.setFont("Helvetica", 15)
-    page.drawRightString(WIDTH-H_MARGIN, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t)
+    page.drawRightString(WIDTH-H_MARGIN, BOTTOM_MARGIN+TARGET_HEIGHT+0.5*HEADER, t2)
+
+    page.setFont("Helvetica", 25)
+
+    page.drawRightString(WIDTH-H_MARGIN, BOTTOM_MARGIN*0.5, "%s (%s)" % (t1, t2))
 
     offset = (WIDTH-(17.5*inch))/2.0
     draw_hole(offset, HEIGHT-(1*inch))
     draw_hole(WIDTH-(offset), HEIGHT-(1*inch))
 
+    page.setFont("Helvetica", 15)
     page.drawCentredString(WIDTH/2, HEIGHT-(1*inch), datetime.datetime.now().isoformat(sep=' ', timespec='seconds'))
 
     PAGE_COUNTER += 1
@@ -312,7 +316,7 @@ PAGESIZE = portrait(A1)
 (WIDTH, HEIGHT) = PAGESIZE
 debug(1, "Width:", WIDTH, "Height:", HEIGHT)
 TOP_MARGIN = 1.75*inch
-BOTTOM_MARGIN = 0.75*inch
+BOTTOM_MARGIN = 1*inch
 H_MARGIN = 0.75*inch
 HEADER = 0.5*inch
 SEPERATOR = 0.25*inch
